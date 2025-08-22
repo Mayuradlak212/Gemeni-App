@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-screen flex flex-col bg-gray-100">
+
+    <!-- Chat Container -->
+    <div class="flex flex-col flex-grow max-w-4xl mx-auto w-full h-full shadow-lg bg-white border rounded-lg">
+        
+        <!-- Header -->
+        <div class="bg-blue-600 text-white text-center py-4 text-xl font-bold">
+            AI Chatbot
+        </div>
+
+        <!-- Chat History -->
+        <div id="chat-box" class="flex-grow p-4 overflow-y-auto space-y-4">
+            <!-- Chat messages will appear here -->
+        </div>
+
+        <!-- Input Box -->
+        <div class="p-4 bg-gray-200 flex items-center">
+            <input id="user-input" type="text" placeholder="Type your message..." 
+                class="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="sendMessage()" class="ml-4 px-6 py-2 bg-blue-600 text-white rounded-lg">
+                Send
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let userId = "67a7121d4c5a50e4980f8951";  // Replace with actual user ID
+
+        async function loadChatHistory() {
+            let response = await fetch(`/qa/chats/${userId}`);
+            let data = await response.json();
+
+            let chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = ""; // Clear previous messages
+
+            data.data.forEach(chat => {
+                chatBox.innerHTML += `
+                    <div class="text-right">
+                        <span class="bg-blue-500 text-white p-2 rounded-lg inline-block">${chat.question}</span>
+                        <span class="text-xs text-gray-500 block">${new Date(chat.created_at).toLocaleString()}</span>
+                    </div>
+                    <div class="text-left">
+                        <span class="bg-gray-300 p-2 rounded-lg inline-block">${chat.response}</span>
+                        <span class="text-xs text-gray-500 block">${new Date(chat.updated_at).toLocaleString()}</span>
+                    </div>
+                `;
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll
+        }
+
+        async function sendMessage() {
+            let inputField = document.getElementById("user-input");
+            let chatBox = document.getElementById("chat-box");
+
+            if (!inputField.value.trim()) return;
+
+            // Append user's message immediately
+            chatBox.innerHTML += `
+                <div class="text-right">
+                    <span class="bg-blue-500 text-white p-2 rounded-lg inline-block">${inputField.value}</span>
+                    <span class="text-xs text-gray-500 block">${new Date().toLocaleString()}</span>
+                </div>`;
+
+            let response = await fetch("/qa/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: userId,embedding:[], question: inputField.value })
+            });
+
+            let data = await response.json();
+
+            // Append AI Response
+            chatBox.innerHTML += `
+                <div class="text-left">
+                    <span class="bg-gray-300 p-2 rounded-lg inline-block">${data.response}</span>
+                    <span class="text-xs text-gray-500 block">${new Date().toLocaleString()}</span>
+                </div>`;
+
+            inputField.value = "";  // Clear input
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll
+        }
+
+        // Load previous chat history on page load
+        loadChatHistory();
+    </script>
+
+</body>
+</html>
