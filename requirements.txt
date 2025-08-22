@@ -3,10 +3,7 @@ uvicorn
 pydantic
 motor
 bcrypt
-dotenv
-os
-datetime
+python-dotenv
 sentence-transformers
 google-generativeai
-python-dotenv
 bson
