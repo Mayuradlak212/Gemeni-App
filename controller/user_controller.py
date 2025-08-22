@@ -1,6 +1,5 @@
 from fastapi import HTTPException
 from datetime import datetime
-from bson import ObjectId
 import bcrypt
 from database import get_collection
 
@@ -37,7 +36,7 @@ def create_user(user_data: dict):
 # Get User by ID
 def get_user(user_id: str):
     try:
-        user = users_collection.find_one({"_id": ObjectId(user_id)}, {"password": 0})  # Exclude password
+        user = users_collection.find_one({"_id": user_id}, {"password": 0})  # Exclude password
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
@@ -66,7 +65,7 @@ def update_user(user_id: str, user_data: dict):
         user_data["updated_at"] = datetime.utcnow()
 
         update_result = users_collection.update_one(
-            {"_id": ObjectId(user_id)}, {"$set": user_data}
+            {"_id": user_id}, {"$set": user_data}
         )
 
         if update_result.modified_count == 0:
@@ -80,7 +79,7 @@ def update_user(user_id: str, user_data: dict):
 # Delete User
 def delete_user(user_id: str):
     try:
-        delete_result = users_collection.delete_one({"_id": ObjectId(user_id)})
+        delete_result = users_collection.delete_one({"_id": user_id})
 
         if delete_result.deleted_count == 0:
             raise HTTPException(status_code=404, detail="User not found")
