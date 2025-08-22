@@ -2,6 +2,11 @@ fastapi
 uvicorn
 pydantic
 motor
+bcrypt
+dotenv
+os
+datetime
 sentence-transformers
 google-generativeai
 python-dotenv
+bson
